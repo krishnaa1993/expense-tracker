@@ -1,40 +1,43 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Expense-Tracker</title>
-</head>
-<body>
+  </head>
+  <body>
     <header><h1>Expense Tracker</h1></header>
     <section>
-        <h2>Summary</h2>
-        <div>
-            <h3>Total balance:</h3>
-            <p id="balance">$0</p>
-        </div>
-        <div>
-            <h3>Income:</h3>
-            <p id="income">$0</p>
-        </div>
-        <div>
-            <h3>Expenses:</h3>
-            <p id="expenses">$0</p>
-        </div>
+      <h2>Summary</h2>
+      <div>
+        <h3>Total balance:</h3>
+        <p id="balance">$0</p>
+      </div>
+      <div>
+        <h3>Income:</h3>
+        <p id="income">$0</p>
+      </div>
+      <div>
+        <h3>Expenses:</h3>
+        <p id="expenses">$0</p>
+      </div>
     </section>
     <section>
-        <h2> Add Transaction</h2>
-        <label for="title">Title<input type="text"  id="title"></label>
-        <label for="amount">Amount<input type="number" id="amount"></label>
-        <label for="type">Type<select  id="type">
-            <option value="opt-income">Income</option>
-            <option value="opt-expense">Expense</option>
-        </select></label>
-        <button>Add Transaction</button>
+      <h2>Add Transaction</h2>
+      <label for="title">Title<input type="text" id="title" /></label>
+      <label for="amount">Amount<input type="number" id="amount" /></label>
+      <label for="type"
+        >Type<select id="type">
+          <option value="">Select type</option>
+          <option value="opt-expense">Expense</option>
+          <option value="opt-income">Income</option>
+        </select></label
+      >
+      <button id="addTransaction">Add Transaction</button>
     </section>
     <section id="transactions">
-        <h2>Transactions</h2>
+      <h2>Transactions</h2>
     </section>
     <script src="script.js"></script>
-</body>
+  </body>
 </html>
