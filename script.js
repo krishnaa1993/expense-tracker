@@ -47,8 +47,25 @@ addButton.addEventListener("click", function () {
 
   const div = document.createElement("div");
   const deleteButton = document.createElement("button");
+  deleteButton.textContent = "Delete";
   div.textContent = `${title} - ${amount} - ${typeText}`;
+  div.appendChild(deleteButton);
   transactions.appendChild(div);
+
+  deleteButton.addEventListener("click", function () {
+    div.remove();
+
+    if (type === "opt-income") {
+      incomeTotal = incomeTotal - amountNumber;
+      totalIncome.textContent = incomeTotal;
+    } else {
+      expenseTotal = expenseTotal - amountNumber;
+      totalExpenses.textContent = expenseTotal;
+    }
+
+    const balance = incomeTotal - expenseTotal;
+    totalBalance.textContent = balance;
+  });
 
   titleInput.value = "";
   amountInput.value = "";
