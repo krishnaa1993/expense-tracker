@@ -1,7 +1,5 @@
-let incomeTotal = 0;
-let expenseTotal = 0;
-
-let editingTransaction = null;
+let transactions = JSON.parse(localStorage.getItem("transactions")) || [];
+let editingId = null;
 
 const totalBalance = document.querySelector("#balance");
 const totalIncome = document.querySelector("#income");
@@ -11,19 +9,113 @@ const titleInput = document.querySelector("#title");
 const amountInput = document.querySelector("#amount");
 const typeInput = document.querySelector("#type");
 const addButton = document.querySelector("#addTransaction");
-const transactions = document.querySelector("#transactions");
+const transactionsContainer = document.querySelector("#transactions");
 
+// Save transactions to LocalStorage
+function saveTransactions() {
+  localStorage.setItem("transactions", JSON.stringify(transactions));
+}
+
+// Calculate and display totals
+function updateSummary() {
+  let incomeTotal = 0;
+  let expenseTotal = 0;
+
+  transactions.forEach(function (transaction) {
+    if (transaction.type === "opt-income") {
+      incomeTotal += transaction.amount;
+    } else {
+      expenseTotal += transaction.amount;
+    }
+  });
+
+  const balance = incomeTotal - expenseTotal;
+
+  totalIncome.textContent = incomeTotal;
+  totalExpenses.textContent = expenseTotal;
+  totalBalance.textContent = balance;
+}
+
+// Display transactions
+function renderTransactions() {
+  transactionsContainer.innerHTML = "<h2>Transactions</h2>";
+
+  transactions.forEach(function (transaction) {
+    const div = document.createElement("div");
+
+    const titleElement = document.createElement("span");
+    titleElement.textContent = transaction.title;
+
+    const amountElement = document.createElement("span");
+    amountElement.textContent = `₹${transaction.amount}`;
+
+    const typeElement = document.createElement("span");
+    typeElement.textContent =
+      transaction.type === "opt-income" ? "Income" : "Expense";
+
+    const editButton = document.createElement("button");
+    editButton.textContent = "Edit";
+
+    const deleteButton = document.createElement("button");
+    deleteButton.textContent = "Delete";
+
+    div.appendChild(titleElement);
+    div.appendChild(amountElement);
+    div.appendChild(typeElement);
+    div.appendChild(editButton);
+    div.appendChild(deleteButton);
+
+    transactionsContainer.appendChild(div);
+
+    // Edit
+    editButton.addEventListener("click", function () {
+      titleInput.value = transaction.title;
+      amountInput.value = transaction.amount;
+      typeInput.value = transaction.type;
+
+      editingId = transaction.id;
+      addButton.textContent = "Update Transaction";
+    });
+
+    // Delete
+    deleteButton.addEventListener("click", function () {
+      transactions = transactions.filter(function (item) {
+        return item.id !== transaction.id;
+      });
+
+      saveTransactions();
+      renderTransactions();
+      updateSummary();
+
+      if (editingId === transaction.id) {
+        editingId = null;
+        clearForm();
+      }
+    });
+  });
+}
+
+// Clear form
+function clearForm() {
+  titleInput.value = "";
+  amountInput.value = "";
+  typeInput.value = "";
+  addButton.textContent = "Add Transaction";
+}
+
+// Add / Update transaction
 addButton.addEventListener("click", function () {
-  const title = titleInput.value;
-  const amountNumber = Number(amountInput.value);
+  const title = titleInput.value.trim();
+  const amount = Number(amountInput.value);
   const type = typeInput.value;
 
+  // Validation
   if (title === "") {
     alert("Please enter a title");
     return;
   }
 
-  if (amountNumber <= 0) {
+  if (amount <= 0) {
     alert("Please enter an amount");
     return;
   }
@@ -33,141 +125,42 @@ addButton.addEventListener("click", function () {
     return;
   }
 
-  let typeText;
+  // Update existing transaction
+  if (editingId !== null) {
+    transactions = transactions.map(function (transaction) {
+      if (transaction.id === editingId) {
+        return {
+          ...transaction,
+          title: title,
+          amount: amount,
+          type: type,
+        };
+      }
 
-  if (type === "opt-income") {
-    typeText = "Income";
-  } else {
-    typeText = "Expense";
+      return transaction;
+    });
+
+    editingId = null;
   }
 
-  // EDIT EXISTING TRANSACTION
-  if (editingTransaction) {
-    const oldAmount = editingTransaction.amount;
-    const oldType = editingTransaction.type;
+  // Add new transaction
+  else {
+    const newTransaction = {
+      id: Date.now(),
+      title: title,
+      amount: amount,
+      type: type,
+    };
 
-    // Remove old amount
-    if (oldType === "opt-income") {
-      incomeTotal -= oldAmount;
-    } else {
-      expenseTotal -= oldAmount;
-    }
-
-    // Add new amount
-    if (type === "opt-income") {
-      incomeTotal += amountNumber;
-    } else {
-      expenseTotal += amountNumber;
-    }
-
-    // Update stored transaction data
-    editingTransaction.amount = amountNumber;
-    editingTransaction.type = type;
-
-    // Update UI
-    editingTransaction.titleElement.textContent = title;
-    editingTransaction.amountElement.textContent = `₹${amountNumber}`;
-    editingTransaction.typeElement.textContent = typeText;
-
-    totalIncome.textContent = incomeTotal;
-    totalExpenses.textContent = expenseTotal;
-    totalBalance.textContent = incomeTotal - expenseTotal;
-
-    // Exit edit mode
-    editingTransaction = null;
-
-    // Clear form
-    titleInput.value = "";
-    amountInput.value = "";
-    typeInput.value = "";
-
-    return;
+    transactions.push(newTransaction);
   }
 
-  // ADD NEW TRANSACTION
-
-  // Update totals
-  if (type === "opt-income") {
-    incomeTotal += amountNumber;
-  } else {
-    expenseTotal += amountNumber;
-  }
-
-  totalIncome.textContent = incomeTotal;
-  totalExpenses.textContent = expenseTotal;
-  totalBalance.textContent = incomeTotal - expenseTotal;
-
-  // Create transaction container
-  const div = document.createElement("div");
-
-  // Create elements
-  const titleElement = document.createElement("span");
-  const amountElement = document.createElement("span");
-  const typeElement = document.createElement("span");
-
-  titleElement.textContent = title;
-  amountElement.textContent = `₹${amountNumber}`;
-  typeElement.textContent = typeText;
-
-  // Create buttons
-  const editButton = document.createElement("button");
-  editButton.textContent = "Edit";
-
-  const deleteButton = document.createElement("button");
-  deleteButton.textContent = "Delete";
-
-  // Store current transaction data on the div
-  div.amount = amountNumber;
-  div.type = type;
-
-  // Store references to display elements
-  div.titleElement = titleElement;
-  div.amountElement = amountElement;
-  div.typeElement = typeElement;
-
-  // Add elements to transaction
-  div.appendChild(titleElement);
-  div.appendChild(amountElement);
-  div.appendChild(typeElement);
-  div.appendChild(editButton);
-  div.appendChild(deleteButton);
-
-  transactions.appendChild(div);
-
-  // EDIT
-  editButton.addEventListener("click", function () {
-    titleInput.value = div.titleElement.textContent;
-    amountInput.value = div.amount;
-    typeInput.value = div.type;
-
-    editingTransaction = div;
-  });
-
-  // DELETE
-  deleteButton.addEventListener("click", function () {
-    div.remove();
-
-    if (div.type === "opt-income") {
-      incomeTotal -= div.amount;
-    } else {
-      expenseTotal -= div.amount;
-    }
-
-    totalIncome.textContent = incomeTotal;
-    totalExpenses.textContent = expenseTotal;
-    totalBalance.textContent = incomeTotal - expenseTotal;
-
-    // If this transaction was being edited, cancel edit mode
-    if (editingTransaction === div) {
-      editingTransaction = null;
-      titleInput.value = "";
-      amountInput.value = "";
-      typeInput.value = "";
-    }
-  });
-
-  // Clear form
-  titleInput.value = "";
-  amountInput.value = "";
-  typeInput.value = "";
+  saveTransactions();
+  renderTransactions();
+  updateSummary();
+  clearForm();
 });
+
+// Load saved data when page opens
+renderTransactions();
+updateSummary();
