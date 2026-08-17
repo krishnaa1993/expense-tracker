@@ -39,7 +39,7 @@ expense-tracker/
 ├── index.html
 ├── style.css
 ├── script.js
-└── README.md```
+└── README.md
 
 How to Run
 Clone the repository:
